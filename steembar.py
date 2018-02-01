@@ -12,25 +12,22 @@
 # Steem         : https://api.coinmarketcap.com/v1/ticker/steem/
 # Steem-dollars : https://api.coinmarketcap.com/v1/ticker/steem-dollars/ 
 
-from os.path import expanduser
-import urllib.request
-import json
+import requests
+
+
+global STEEM_NAME
 
 choose = ['steem', 'steem-dollars']
-STEEM_NAME = 'tolgahanuzun' 
-
 URL = 'https://api.coinmarketcap.com/v1/ticker/{}'
 API = 'https://api.steemjs.com/'
 
 def fetch(url):
-    response = urllib.request.urlopen(url)
-    data = response.read()
-    data = json.loads(data)[0]
-    return data
+    response = requests.get(url).json()
+    return response
 
 def get_coin(coin):
     url = URL.format(coin)
-    data = fetch(url)
+    data = fetch(url)[0]
     return data['price_usd']
 
 def steemit_api(steemit_name):
@@ -40,21 +37,37 @@ def steemit_api(steemit_name):
 def blog_list(steemit_name, number=10):
     posts = steemit_api(steemit_name)
     post = posts['content']
-    result = {'result_blog': [], 'result_url': []}
-    for pk in posts['accounts'][result]['blog'][:number]:
-        if post[pk]['category'] == 'utopian-io':
-            result['result_blog'].append(pk)
-            result['result_url'].append(post[pk]['url'])
-    return result
 
+    result = []
+    for pk in posts['accounts'][steemit_name]['blog'][:number]:
+        result.append({"result_blog":pk,
+                       "result_url": 'https://steemit.com{}.json'.format(post[pk]['url']),
+                       "tittle":post[pk]['root_title'],
+                       "votes":post[pk]['net_votes'],
+                       "balance":post[pk]['pending_payout_value']})
+
+    return result
 
 def main():
     steem_usd = get_coin(choose[0])
     sbd_usd = get_coin(choose[1])
-    text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd )
+    text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
     print(text)
     print("---")
-    print('@'+ STEEM_NAME + "| color=black")
+    print('@{}'.format(STEEM_NAME) + "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
     print("---")
+    for blog in blog_list(STEEM_NAME):
+        if STEEM_NAME in blog['result_url']:
+            print(blog['tittle'].encode('utf-8').strip()[0:30].decode('ascii', 'ignore')+ '| ')
+            print('--' + "Votes: {}".format(blog['votes']))
+            print('--' + "Balance: {}".format(blog['balance']))
+            print('--' + "Go to Post | href=" + blog['result_url'])
 
-main()
+
+if __name__ == '__main__':
+
+    ### Change name
+    STEEM_NAME = 'tolgahanuzun'
+    ### Change name
+
+    main()
