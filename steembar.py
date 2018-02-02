@@ -16,6 +16,7 @@
 import requests
 import os
 
+
 global STEEM_NAME
 
 choose = ['steem', 'steem-dollars']
@@ -50,10 +51,6 @@ def blog_list(steemit_name, number=10):
     return result
 
 def main():
-    steem_usd = get_coin(choose[0])
-    sbd_usd = get_coin(choose[1])
-    text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
-    print(text)
     print("---")
     print('@{}'.format(STEEM_NAME) + "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
     print("---")
@@ -66,6 +63,10 @@ def main():
 
 
 if __name__ == '__main__':
+    steem_usd = get_coin(choose[0])
+    sbd_usd = get_coin(choose[1])
+    text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
+    print(text)
     try:
         STEEM_NAME = os.environ['steemitname']
     except:
