@@ -6,14 +6,15 @@
 # <bitbar.author>Tolgahan Üzün</bitbar.author>
 # <bitbar.author.github>tolgahanuzun</bitbar.author.github>
 # <bitbar.desc>A bar application for Steemit.</bitbar.desc>
-# <bitbar.image> Coming. </bitbar.image>
+# <bitbar.image>https://raw.githubusercontent.com/tolgahanuzun/steembar/master/steembar.png</bitbar.image>
 # <bitbar.dependencies>python3</bitbar.dependencies>
 
 # Steem         : https://api.coinmarketcap.com/v1/ticker/steem/
 # Steem-dollars : https://api.coinmarketcap.com/v1/ticker/steem-dollars/ 
+# Steem Api Exp : https://api.steemjs.com/get_state?path=@tolgahanuzun
 
 import requests
-
+import os
 
 global STEEM_NAME
 
@@ -65,9 +66,8 @@ def main():
 
 
 if __name__ == '__main__':
-
-    ### Change name
-    STEEM_NAME = 'tolgahanuzun'
-    ### Change name
-
+    try:
+        STEEM_NAME = os.environ['steemitname']
+    except:
+        STEEM_NAME = 'tolgahanuzun'
     main()
