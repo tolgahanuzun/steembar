@@ -14,11 +14,8 @@
 # Steem Api Exp : https://api.steemjs.com/get_state?path=@tolgahanuzun
 
 import requests
-import os
-from datetime import datetime
-from time import mktime
-from time import time
-
+import os=
+from math import ceil
 
 global STEEM_NAME
 
@@ -39,18 +36,11 @@ def steemit_api(steemit_name):
     url = '{}get_state?path=@{}'.format(API, steemit_name)
     return fetch(url)
 
-
 def get_vp(steemit_name):
     url = '{}get_accounts?names[]=%5B%22{}%22%5D'.format(API, steemit_name)
     data = fetch(url)[0]
     vp = data['voting_power']
-    last_vote_time = data['last_vote_time'] + "Z"
-    vote_time = mktime(
-        datetime.strptime(last_vote_time,
-                          "%Y-%m-%dT%H:%M:%SZ").timetuple())
-    secondsago = (time() - vote_time) / 1000
-    final_vp = min(10000, vp + 10000 * secondsago / 432000) / 10000;
-    return round(final_vp * 100)
+    return ceil(vp / 100)
 
 def blog_list(steemit_name, number=10):
     posts = steemit_api(steemit_name)
