@@ -69,6 +69,7 @@ def blog_list(steemit_name, number=10):
 def main():
     print("---")
     print('@{}'.format(STEEM_NAME) + "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
+    print('Voting Power: %{}'.format(get_vp(STEEM_NAME)))
     print("---")
     for blog in blog_list(STEEM_NAME):
         if STEEM_NAME in blog['result_url']:
