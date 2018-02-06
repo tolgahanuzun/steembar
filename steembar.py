@@ -15,7 +15,9 @@
 
 import requests
 import os
-
+from math import ceil
+from math import log
+from math import isnan
 
 global STEEM_NAME
 
@@ -36,6 +38,30 @@ def steemit_api(steemit_name):
     url = '{}get_state?path=@{}'.format(API, steemit_name)
     return fetch(url)
 
+
+def get_vp_rp(steemit_name):
+    url = '{}get_accounts?names[]=%5B%22{}%22%5D'.format(API, steemit_name)
+    data = fetch(url)[0]
+    vp = data['voting_power']
+    _reputation = data['reputation']
+    _reputation = int(_reputation)
+
+    rep = str(_reputation)
+    neg = True if rep[0] == '-' else False
+    rep = rep[1:] if neg else rep
+    srt = rep
+    leadingDigits = int(srt[0:4])
+    log_n = log(leadingDigits / log(10), 2.71828)
+    n  = len(srt) - 1
+    out = n + (log_n - int(log_n))
+    if isnan(out): out = 0
+    out = max(out - 9, 0)
+
+    out = (-1 * out) if neg else (1 * out)
+    out = out * 9 + 25
+    out = int(out)
+    return [ceil(vp / 100), out]
+
 def blog_list(steemit_name, number=10):
     posts = steemit_api(steemit_name)
     post = posts['content']
@@ -52,7 +78,9 @@ def blog_list(steemit_name, number=10):
 
 def main():
     print("---")
-    print('@{}'.format(STEEM_NAME) + "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
+    print('@{} ({})'.format(STEEM_NAME, get_vp_rp(STEEM_NAME)[1]) +
+          "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
+    print('Voting Power: %{}'.format(get_vp_rp(STEEM_NAME)[0]))
     print("---")
     for blog in blog_list(STEEM_NAME):
         if STEEM_NAME in blog['result_url']:
