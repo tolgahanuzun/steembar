@@ -10,8 +10,10 @@
 # <bitbar.dependencies>python3</bitbar.dependencies>
 
 # Steem         : https://api.coinmarketcap.com/v1/ticker/steem/
-# Steem-dollars : https://api.coinmarketcap.com/v1/ticker/steem-dollars/ 
+# Steem-dollars : https://api.coinmarketcap.com/v1/ticker/steem-dollars/
+# Bitcoin       : https://api.coinmarketcap.com/v1/ticker/bitcoin/
 # Steem Api Exp : https://api.steemjs.com/get_state?path=@tolgahanuzun
+# Steem APi     : https://steemit.com/@tolgahanuzun.json
 
 import requests
 import os
@@ -21,7 +23,7 @@ from math import isnan
 
 global STEEM_NAME
 
-choose = ['steem', 'steem-dollars']
+choose = ['steem', 'steem-dollars', 'bitcoin']
 URL = 'https://api.coinmarketcap.com/v1/ticker/{}'
 API = 'https://api.steemjs.com/'
 
@@ -32,7 +34,7 @@ def fetch(url):
 def get_coin(coin):
     url = URL.format(coin)
     data = fetch(url)[0]
-    return data['price_usd']
+    return data['price_usd'], data['percent_change_24h']
 
 def steemit_api(steemit_name):
     url = '{}get_state?path=@{}'.format(API, steemit_name)
@@ -76,6 +78,12 @@ def blog_list(steemit_name, number=10):
 
     return result
 
+def balance(steemit_name):
+    data = steemit_api(steemit_name)
+    balance = data['accounts'][steemit_name]['sbd_balance']
+    balance = balance.split(' SBD')[0]
+    return balance
+
 def main():
     print("---")
     print('@{} ({})'.format(STEEM_NAME, get_vp_rp(STEEM_NAME)[1]) +
@@ -91,12 +99,25 @@ def main():
 
 
 if __name__ == '__main__':
-    steem_usd = get_coin(choose[0])
-    sbd_usd = get_coin(choose[1])
-    text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
-    print(text)
     try:
         STEEM_NAME = os.environ['steemitname']
     except:
         STEEM_NAME = 'tolgahanuzun'
-    main()
+
+    try:
+        steem_usd, steem_change_24 = get_coin(choose[0])
+        sbd_usd, sbd_change_24 = get_coin(choose[1])
+        bitcoin_usd, btc_change_24 = get_coin(choose[2])
+        text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
+        print(text)
+        print('---')
+        text = "Bitcoin: $ {} (% {})".format(bitcoin_usd, btc_change_24)
+        print(text)
+        balance = balance(STEEM_NAME)
+        text = "Balance:  {} - USD to $ {:.2f}".format(balance, float(steem_usd) * float(balance))        
+        print(text)
+        main()
+    except requests.ConnectionError:
+        text = "Please check your internet connection."
+        print(text)
+    
