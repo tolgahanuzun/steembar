@@ -40,7 +40,6 @@ def steemit_api(steemit_name):
     url = '{}get_state?path=@{}'.format(API, steemit_name)
     return fetch(url)
 
-
 def get_vp_rp(steemit_name):
     url = '{}get_accounts?names[]=%5B%22{}%22%5D'.format(API, steemit_name)
     data = fetch(url)[0]
@@ -74,7 +73,7 @@ def blog_list(steemit_name, number=10):
                        "result_url": 'https://steemit.com{}.json'.format(post[pk]['url']),
                        "tittle":post[pk]['root_title'],
                        "votes":post[pk]['net_votes'],
-                       "balance":post[pk]['pending_payout_value']})
+                       "balance":post[pk]['pending_payout_value'].split(' SBD')[0]})
 
     return result
 
@@ -84,7 +83,20 @@ def balance(steemit_name):
     balance = balance.split(' SBD')[0]
     return balance
 
-def main():
+def main(STEEM_NAME):
+    steem_usd, steem_change_24 = get_coin(choose[0])
+    sbd_usd, sbd_change_24 = get_coin(choose[1])
+    bitcoin_usd, btc_change_24 = get_coin(choose[2])
+
+    text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
+    print(text)
+    print('---')
+    text = "Bitcoin: $ {} (% {})".format(bitcoin_usd, btc_change_24)
+    print(text)
+    total_balance = balance(STEEM_NAME)
+    text = "Balance: {} SBD -> $ {:.2f}".format(total_balance, float(steem_usd) * float(total_balance))
+    print(text)
+
     print("---")
     print('@{} ({})'.format(STEEM_NAME, get_vp_rp(STEEM_NAME)[1]) +
           "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
@@ -94,9 +106,8 @@ def main():
         if STEEM_NAME in blog['result_url']:
             print(blog['tittle'].encode('utf-8').strip()[0:30].decode('ascii', 'ignore')+ '| ')
             print('--' + "Votes: {}".format(blog['votes']))
-            print('--' + "Balance: {}".format(blog['balance']))
+            print('--' + "Balance: {} -> $ {:.2f} ".format(blog['balance'], float(blog['balance'])* float(sbd_usd) ))
             print('--' + "Go to Post | href=" + blog['result_url'])
-
 
 if __name__ == '__main__':
     try:
@@ -105,18 +116,7 @@ if __name__ == '__main__':
         STEEM_NAME = 'tolgahanuzun'
 
     try:
-        steem_usd, steem_change_24 = get_coin(choose[0])
-        sbd_usd, sbd_change_24 = get_coin(choose[1])
-        bitcoin_usd, btc_change_24 = get_coin(choose[2])
-        text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
-        print(text)
-        print('---')
-        text = "Bitcoin: $ {} (% {})".format(bitcoin_usd, btc_change_24)
-        print(text)
-        balance = balance(STEEM_NAME)
-        text = "Balance:  {} - USD to $ {:.2f}".format(balance, float(steem_usd) * float(balance))        
-        print(text)
-        main()
+        main(STEEM_NAME)
     except requests.ConnectionError:
         text = "Please check your internet connection."
         print(text)
