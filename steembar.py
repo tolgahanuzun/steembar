@@ -83,10 +83,18 @@ def balance(steemit_name):
     balance = balance.split(' SBD')[0]
     return balance
 
+def activity(username)
+    activity_api = 'http://159.65.21.161:2001/user_details?name={}&vote=true&follow=true&post=true&transfer=true'
+    activity_url = activity_api.format(username)
+    return requests.get(activity_url).json()
+
+
 def main(STEEM_NAME):
     steem_usd, steem_change_24 = get_coin(choose[0])
     sbd_usd, sbd_change_24 = get_coin(choose[1])
     bitcoin_usd, btc_change_24 = get_coin(choose[2])
+
+    activity_datas = activity(STEEM_NAME)
 
     text = "Steem: $ {} - SBD: $ {}".format(steem_usd, sbd_usd)
     print(text)
@@ -97,6 +105,10 @@ def main(STEEM_NAME):
     text = "Balance: {} SBD -> $ {:.2f}".format(total_balance, float(steem_usd) * float(total_balance))
     print(text)
 
+    print("---")
+    print(" Activity |")
+    for activity_data in activity_datas:
+        print('-- ' + activity_data )
     print("---")
     print('@{} ({})'.format(STEEM_NAME, get_vp_rp(STEEM_NAME)[1]) +
           "| color=black href=https://steemit.com/@{}".format(STEEM_NAME))
