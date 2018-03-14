@@ -70,7 +70,7 @@ def blog_list(steemit_name, number=10):
     result = []
     for pk in posts['accounts'][steemit_name]['blog'][:number]:
         result.append({"result_blog":pk,
-                       "result_url": 'https://steemit.com{}.json'.format(post[pk]['url']),
+                       "result_url": 'https://steemit.com{}'.format(post[pk]['url']),
                        "tittle":post[pk]['root_title'],
                        "votes":post[pk]['net_votes'],
                        "balance":post[pk]['pending_payout_value'].split(' SBD')[0]})
@@ -83,10 +83,20 @@ def balance(steemit_name):
     balance = balance.split(' SBD')[0]
     return balance
 
-def activity(username)
+def activity(username):
     activity_api = 'http://159.65.21.161:2001/user_details?name={}&vote=true&follow=true&post=true&transfer=true'
     activity_url = activity_api.format(username)
-    return requests.get(activity_url).json()
+    new_data = []
+    datas = requests.get(activity_url).json()['result']
+    for data in datas:
+        if data.split(" ")[1] == "voteup" or data.split(" ")[1] == "comment":
+            text = data.split('<a href=')[0] + data.split('<a href=')[1].split("'>")[1].split('<')[0]
+            url = data.split('<a href=')[1].split("'")[1]
+            new_data.append("{} | color=black href={}".format(text, url))
+        else:
+            new_data.append(data)
+    
+    return new_data
 
 
 def main(STEEM_NAME):
@@ -106,10 +116,7 @@ def main(STEEM_NAME):
     print(text)
 
     print("---")
-    print(" Activity Vote|")
-    for activity_data in activity_datas[:30]:
-        print('-- ' + activity_data )
-    print(" Activity Follow|")
+    print(" Activity |")
     for activity_data in activity_datas[:30]:
         print('-- ' + activity_data )
     print("---")
@@ -135,4 +142,3 @@ if __name__ == '__main__':
     except requests.ConnectionError:
         text = "Please check your internet connection."
         print(text)
-    
