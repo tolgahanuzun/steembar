@@ -106,8 +106,11 @@ def main(STEEM_NAME):
     print(text)
 
     print("---")
-    print(" Activity |")
-    for activity_data in activity_datas:
+    print(" Activity Vote|")
+    for activity_data in activity_datas[:30]:
+        print('-- ' + activity_data )
+    print(" Activity Follow|")
+    for activity_data in activity_datas[:30]:
         print('-- ' + activity_data )
     print("---")
     print('@{} ({})'.format(STEEM_NAME, get_vp_rp(STEEM_NAME)[1]) +
